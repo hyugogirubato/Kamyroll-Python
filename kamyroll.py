@@ -125,9 +125,7 @@ def get_object_title(country, object):
     titles = ["{}.peer".format(country), country, "id"]
     for i in range(len(titles)):
         if titles[i] in object:
-            title = titles[i]
-            break
-    return title
+            return titles[i]
 
 
 def get_proxies():
