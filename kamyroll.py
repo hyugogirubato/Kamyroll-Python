@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--download")
     parser.add_argument("--format")
     parser.add_argument("--guided", "-g", action='store_true')
+    parser.add_argument("--link_only", "-l", action='store_true')
     args = parser.parse_args()
 
     limit = 100
@@ -36,7 +37,7 @@ def main():
         start_session(args.session_id, False)
     else:
         if args.guided:
-            guided()
+            guided(args.link_only)
             exit()
 
         if os.path.isfile("config.json"):
@@ -55,7 +56,7 @@ def main():
             elif args.download:
                 if args.format:
                     display = False
-                    download(args.download, args.format)
+                    download(args.download, args.format, args.link_only)
                 else:
                     print("ERROR: Download format required.")
                     sys.exit(0)
@@ -63,7 +64,7 @@ def main():
             print("ERROR: Login or session required.")
             sys.exit(0)
 
-def guided():
+def guided(link_only=False):
     print('--GUIDED MODE--')
     query = input('Enter anime name: ')
     series_id: str = search(query, 20, await_input=True)
@@ -71,7 +72,7 @@ def guided():
     episode_id: str = get_episodes(season_id, await_input=True)
     selected_format: str = get_formats(episode_id, await_input=True)
     print(f'Downloading {selected_format}...')
-    download(episode_id, selected_format)
+    download(episode_id, selected_format, link_only)
 
 
 def init_proxies(proxy):
@@ -856,7 +857,7 @@ def get_duration(duration_ms):
     )
 
 
-def download(args_download, args_format):
+def download(args_download, args_format, print_link=False):
     global dl_url, dl_extension, dl_format
 
     stream_id = args_download
@@ -880,6 +881,10 @@ def download(args_download, args_format):
                 break
     else:
         print("ERROR: Format not found")
+        sys.exit(0)
+
+    if print_link:
+        print(dl_url)
         sys.exit(0)
 
     if dl_url != "" and dl_extension != "":

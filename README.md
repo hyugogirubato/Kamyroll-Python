@@ -52,6 +52,15 @@ or
 
     kamyroll.py -g
     
+
+### Add the link-only flag to skip the download and print the download URL to stdout
+
+    kamyroll.py --link_only
+
+or
+
+    kamyroll.py -l
+    
 Limited search
 ```
 kamyroll.py --search "TITLE" --limit 10
