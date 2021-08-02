@@ -23,6 +23,7 @@ Kamyroll-python is the python version of the program used in the application [Ka
  - Each command requires a particular id, if it is not respected, it will be impossible to load valid data.
  - You can change the location of downloads by changing the "dl_root" variable in the script to choose a custom output folder.
  - US unlocking is only available when the user logs in with their credentials.
+ - Easy to use guided mode.
 
 ## Examples
 
@@ -41,6 +42,16 @@ Connecting with session_id
 kamyroll.py --session_id "SESSION_ID"
 ```
 
+### After logging in, you can use the command line or use the guided mode: 
+
+    
+    kamyroll.py --guided
+    
+or
+
+
+    kamyroll.py -g
+    
 Limited search
 ```
 kamyroll.py --search "TITLE" --limit 10

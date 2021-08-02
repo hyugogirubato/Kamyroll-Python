@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--formats")
     parser.add_argument("--download")
     parser.add_argument("--format")
+    parser.add_argument("--guided", "-g", action='store_true')
     args = parser.parse_args()
 
     limit = 100
@@ -34,6 +35,10 @@ def main():
     elif args.session_id:
         start_session(args.session_id, False)
     else:
+        if args.guided:
+            guided()
+            exit()
+
         if os.path.isfile("config.json"):
             if args.search:
                 if args.limit:
@@ -57,6 +62,16 @@ def main():
         else:
             print("ERROR: Login or session required.")
             sys.exit(0)
+
+def guided():
+    print('hi')
+    query = input('Enter anime name: ')
+    series_id: str = search(query, 20, await_input=True)
+    season_id: str = get_seasons(series_id, await_input=True)
+    episode_id: str = get_episodes(season_id, await_input=True)
+    selected_format: str = get_formats(episode_id, await_input=True)
+    print(f'Downloading {selected_format}...')
+    download(episode_id, selected_format)
 
 
 def init_proxies(proxy):
@@ -330,7 +345,7 @@ def get_locale():
     return locale
 
 
-def search(args_search, args_limit):
+def search(args_search, args_limit, await_input=False):
     query = args_search
     limit = args_limit
 
@@ -344,14 +359,28 @@ def search(args_search, args_limit):
         total = item.get("total")
         if type == "series":
             if total != 0:
-                search_series(item.get("items"))
+                search_ids = search_series(item.get("items"))
             else:
+                search_ids = None
                 print("\n[debug] No results for: series")
         elif type == "movie_listing":
             if total != 0:
-                search_movie_listing(item.get("items"))
+                movie_ids = search_movie_listing(item.get("items"))
             else:
+                movie_ids = None
                 print("\n[debug] No results for: movie_listing")
+    
+    if await_input:
+        ret = input('Enter S.no. : ')
+        if (ret.startswith('s') or ret.startswith('S')) and search_ids:
+            return search_ids[int(ret[1:])]
+
+        elif (ret.startswith('M') or ret.startswith('m')) and movie_ids:
+            return movie_ids[int(ret[1:])]
+
+        else:
+            print('Enter correct S.no.')
+            exit()
 
 
 def search_series(items):
@@ -366,11 +395,12 @@ def search_series(items):
         title.append(item.get("title"))
 
     print("\n[debug] Result for: series")
-    print("{0:<15} {1:<40} {2:<10} {3:<10}".format("ID", "Title", "Season", "Episode"))
+    print("{4:<5} | {0:<15} {1:<40} {2:<10} {3:<10}".format("ID", "Title", "Season", "Episode", "S.no."))
     for i in range(len(id)):
-        print("{0:<15} {1:<40} {2:<10} {3:<10}".format(
-                id[i], title[i], season_count[i], episode_count[i]
+        print("{4:<5} | {0:<15} {1:<40} {2:<10} {3:<10}".format(
+                id[i], title[i], season_count[i], episode_count[i], f"S{i}"
             ))
+    return id
 
 
 def search_movie_listing(items):
@@ -383,12 +413,14 @@ def search_movie_listing(items):
         title.append(item.get("title"))
 
     print("\n[debug] Result for: movie_listing")
-    print("{0:<15} {1:<40} {2:<10}".format("ID", "Title", "Year"))
+    print("{3:<5} | {0:<15} {1:<40} {2:<10}".format("ID", "Title", "Year", "S.no."))
     for i in range(len(id)):
-        print("{0:<15} {1:<40} {2:<10}".format(id[i], title[i], movie_release_year[i]))
+        print("{3:<5} | {0:<15} {1:<40} {2:<10}".format(id[i], title[i], movie_release_year[i], f"M{i}"))
+    
+    return id
 
 
-def get_seasons(args_seasons):
+def get_seasons(args_seasons, await_input=False):
     series_id = args_seasons
 
     config = get_config()
@@ -418,12 +450,15 @@ def get_seasons(args_seasons):
         season_number.append(item.get("season_number"))
 
     print("\n[debug] Seasons for {}:".format(series_id))
-    print("{0:<15} {1:<10} {2:<40}".format("ID", "Season", "Title"))
+    print("{3:<5} | {0:<15} {1:<10} {2:<40}".format("ID", "Season", "Title", "S.no."))
     for i in range(len(id)):
-        print("{0:<15} {1:<10} {2:<40}".format(id[i], season_number[i], title[i]))
+        print("{3:<5} | {0:<15} {1:<10} {2:<40}".format(id[i], season_number[i], title[i], i))
 
+    if await_input:
+        ret = int(input('Enter S.no. : '))
+        return id[ret]
 
-def get_episodes(args_episodes):
+def get_episodes(args_episodes, await_input=False):
     season_id = args_episodes
 
     config = get_config()
@@ -467,17 +502,20 @@ def get_episodes(args_episodes):
 
     print("\n[debug] Episodes for {}:".format(season_id))
     print(
-        "{0:<15} {1:<10} {2:<10} {3:<40}".format(
-            "ID", "Episode", "Premium only", "Title"
+        "{4:<5} | {0:<15} {1:<10} {2:<10} {3:<40}".format(
+            "ID", "Episode", "Premium only", "Title", "S.no."
         )
     )
     for i in range(len(id)):
         print(
-            "{0:<15} {1:<10} {2:<10} {3:<40}".format(
-                id[i], episode[i], get_boolean(is_premium_only[i]), title[i]
+            "{4:<5} | {0:<15} {1:<10} {2:<10} {3:<40}".format(
+                id[i], episode[i], get_boolean(is_premium_only[i]), title[i], i
             )
         )
 
+    if await_input:
+        ret = int(input('Enter S.no. : '))
+        return id[ret]
 
 def get_boolean(boolean):
     if boolean:
@@ -485,8 +523,7 @@ def get_boolean(boolean):
     else:
         return "False"
 
-
-def get_formats(arg_formats):
+def get_formats(arg_formats, await_input=False):
     global streams_id, audio_locale
     streams_id = arg_formats
 
@@ -516,8 +553,20 @@ def get_formats(arg_formats):
 
     init_download(type, id)
     audio_locale = r.json().get("audio_locale")
-    formats_subtitles(get_items(r.json().get("subtitles")))
-    formats_videos(get_items(r.json().get("streams").get("adaptive_hls")))
+    subs = formats_subtitles(get_items(r.json().get("subtitles")))
+    vids = formats_videos(get_items(r.json().get("streams").get("adaptive_hls")))
+
+    if await_input:
+        ret = input('Enter S.no. : ')
+        if (ret.startswith('s') or ret.startswith('S')) and subs:
+            return subs[int(ret[1:])]
+
+        elif (ret.startswith('v') or ret.startswith('V')) and vids:
+            return vids[int(ret[1:])]
+
+        else:
+            print('Enter correct S.no.')
+            exit()
 
 
 def init_download(type, id):
@@ -629,15 +678,18 @@ def formats_subtitles(items):
 
     if display:
         print("\n[debug] Subtitles for {}:".format(streams_id))
-        print("{0:<40} {1:<20} {2:<20}".format("Format code", "Extension", "Language"))
+        print("{3:<5} | {0:<40} {1:<20} {2:<20}".format("Format code", "Extension", "Language", "S.no."))
         for i in range(len(locale)):
             print(
-                "{0:<40} {1:<20} {2:<20}".format(
+                "{3:<5} | {0:<40} {1:<20} {2:<20}".format(
                     subtitles_format_code[i],
                     subtitles_extension[i],
                     get_locale_title(locale[i]),
+                    f"S{i}"
                 )
             )
+    
+    return subtitles_format_code
 
 
 def formats_videos(items):
@@ -686,17 +738,18 @@ def formats_videos(items):
     if display:
         print("\n[debug] Videos for {}:".format(streams_id))
         print(
-            "{0:<40} {1:<20} {2:<20} {3:<40}".format(
-                "Format code", "Extension", "Resolution", "Note"
+            "{4:<5} | {0:<40} {1:<20} {2:<20} {3:<40}".format(
+                "Format code", "Extension", "Resolution", "Note", "S.no."
             )
         )
         for i in range(len(videos_format_code)):
             print(
-                "{0:<40} {1:<20} {2:<20} {3:<40}".format(
-                    videos_format_code[i], "mp4", resolutions[i], note[i]
+                "{4:<5} | {0:<40} {1:<20} {2:<20} {3:<40}".format(
+                    videos_format_code[i], "mp4", resolutions[i], note[i], f"V{i}"
                 )
             )
 
+    return videos_format_code
 
 def get_locale_title(locale):
     title = "Disabled"
