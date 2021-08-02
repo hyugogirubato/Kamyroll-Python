@@ -64,7 +64,7 @@ def main():
             sys.exit(0)
 
 def guided():
-    print('hi')
+    print('--GUIDED MODE--')
     query = input('Enter anime name: ')
     series_id: str = search(query, 20, await_input=True)
     season_id: str = get_seasons(series_id, await_input=True)
