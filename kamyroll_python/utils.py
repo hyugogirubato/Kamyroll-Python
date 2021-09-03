@@ -128,7 +128,7 @@ def get_metadata_genre(config):
     bucket = config.get('configuration').get('token').get('bucket')
     country_code = bucket.split('/')[1]
     list_language = ['en-US', 'en-GB', 'es-419', 'es-ES', 'pt-BR', 'pt-PT', 'fr-FR', 'de-DE', 'ar-SA', 'it-IT', 'ru-RU']
-    list_genre = ['Animation', 'Animation', 'Animación', 'Animación', 'Animação', 'Animação', 'Animation', 'Animation', 'تنشيط', 'Animazione', 'Анимация']
+    list_genre = ['Animation', 'Animation', 'Animación', 'Animación', 'Animação', 'Animação', 'Animation', 'Animation', 'أنيميشن', 'Animazione', 'Анимация']
     genre = list_genre[0]
     for i in range(len(list_language)):
         country = list_language[i].split('-')[1].strip()
