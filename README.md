@@ -139,5 +139,5 @@ kamyroll -u "EPISODE_ID or MOVIE_ID"
 ```
 
 ---
-*This script was created by the [__Nashi Team__](https://sites.google.com/view/kamyroll/home).  
+*This script was created by the [__Nashi Team__].  
 Find us on [discord](https://discord.com/invite/g6JzYbh) for more information on projects in development.*
