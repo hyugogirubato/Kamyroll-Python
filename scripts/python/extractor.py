@@ -229,18 +229,26 @@ def download_url(json_stream, config):
 
 def get_m3u8_url(video_url, config):
     resolution = str(config.get('preferences').get('video').get('resolution'))
+        
     m3u8_url = None
     resolution_available = list()
     r = requests.get(video_url).text
     items = r.split('#EXT-X-STREAM')
+    first = None
     for item in items:
         if 'RESOLUTION' in item:
+            if not first:
+                first = item
             m3u8_resolution = (item.split('RESOLUTION=')[1].split(',')[0].split('x')[1].strip())
             if m3u8_resolution not in resolution_available:
                 resolution_available.append(m3u8_resolution)
-            if resolution in item:
+            if ((resolution == 'None') or (resolution in item)):
                 m3u8_url = 'http{}'.format(item.split('http')[1].strip())
 
+    if resolution == 'None' or m3u8_url is None:
+        utils.print_msg(f"[debug] No resolution set/selected resolution not found fallback to {first.split('RESOLUTION=')[1].split(',')[0].split('x')[1].strip()}p", 0)
+        # atleast get the highest available quality
+        m3u8_url = 'http{}'.format(first.split('http')[1].strip())
     utils.print_msg('[debug] Video resolution available: {}'.format(resolution_available), 0)
     return m3u8_url
 
