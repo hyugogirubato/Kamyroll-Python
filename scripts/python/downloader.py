@@ -62,7 +62,7 @@ class crunchyroll:
 
         if self.config.get('preferences').get('download').get('subtitles'):
             if subtitles_url is None:
-                utils.print_msg('ERROR: No subtitles download link available.', 1)
+                utils.print_msg('ERROR: No subtitles download link specified in config file.', 1)
                 sys.exit(0)
 
             subtitle = converter.Subtitles(os.path.join(path, output), self.config.get('preferences').get('subtitles').get('language'))

@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["-d", "GKKFNXN72"]
+            "args": ["--url", "GKKFNXN72"]
         }
     ]
 }
