@@ -11,7 +11,27 @@ import requests
 import converter
 import extractor
 import utils
-# from super_stream_tools import tools
+from asyncio import run
+
+ISO_639_2_LOOKUP = {
+    "": "",
+    "ar-ME": "ara",
+    "ar-SA": "ara",
+    "zh-CN": "chi",
+    "en-US": "eng",
+    "fr-FR": "fre",
+    "de-DE": "ger",
+    "it-IT": "ita",
+    "ja-JP": "jpn",
+    "pt-BR": "por",
+    "pt-PT": "por",
+    "ru-RU": "rus",
+    "es-419": "spa",
+    "es-ES": "spa",
+    "tr-TR": "tur",
+    "jp-JP": "jpn",
+    "es-LA": "spa"
+}
 
 def image(output, url):
     if not os.path.exists(output):
@@ -60,7 +80,18 @@ class crunchyroll:
         (metadata, cover, thumbnail, output, path) = extractor.get_metadata(type, id, self.config)
         utils.create_folder(path)
 
-        if self.config.get('preferences').get('download').get('subtitles'):
+        already_downloaded = False
+
+        if all_subs:
+            from super_stream_tools.tools import encoder
+
+            already_downloaded = True
+            utils.print_msg('[debug] Downloading video with all subs', 0)
+            encode = encoder(verbose=True) 
+            subtitles = [{'url':i.get('url'), 'lang': ISO_639_2_LOOKUP.get(i.get('locale'))} for i in subtitles_url.values()]
+            run(encode.download(video_url, subtitles, execute=True, output_file=os.path.join(path, output+'.mkv'), thumbnail=thumbnail, audio_lang=ISO_639_2_LOOKUP.get(audio_language)))
+
+        if self.config.get('preferences').get('download').get('subtitles') and not already_downloaded:
             if subtitles_url is None:
                 utils.print_msg('ERROR: No subtitles download link specified in config file.', 1)
                 sys.exit(0)
@@ -78,11 +109,6 @@ class crunchyroll:
 
             utils.print_msg('[debug] Downloaded subtitles', 0)
 
-        if all_subs:
-            utils.print_msg('[debug] Downloading video with all subs', 0)
-            # encode = encoder(verbose=True)
-            # encode.download(video_url, subtitles_url, output)
-
         if self.config.get('preferences').get('image').get('cover') or self.config.get('preferences').get('video').get('attached_picture'):
             image(os.path.join(path, 'cover.jpg'), cover)
             if self.config.get('preferences').get('image').get('cover'):
@@ -92,7 +118,7 @@ class crunchyroll:
             image(os.path.join(path, '{}.jpg'.format(output)), thumbnail)
             utils.print_msg('[debug] Downloaded thumbnail', 0)
 
-        if self.config.get('preferences').get('download').get('video'):
+        if self.config.get('preferences').get('download').get('video') and not already_downloaded:
 
             if video_url is None:
                 utils.print_msg('ERROR: No video download link available.', 1)
@@ -214,7 +240,7 @@ class crunchyroll:
                 utils.print_msg('ERROR: Video extension is not supported.', 1)
                 sys.exit(0)
 
-    def download_season(self, season_id, playlist_episode):
+    def download_season(self, season_id, playlist_episode, all_subs=False):
         (policy, signature, key_pair_id) = utils.get_token(self.config)
         self.config = utils.get_config()
 
@@ -238,6 +264,6 @@ class crunchyroll:
         else:
             for i in range(len(playlist_id)):
                 utils.print_msg('[debug] Download playlist: {}/{}'.format(i + 1, len(playlist_id)), 0)
-                self.download(playlist_id[i])
+                self.download(playlist_id[i], all_subs=all_subs)
             utils.print_msg('[debug] The playlist has been downloaded', 0)
             sys.exit(0)

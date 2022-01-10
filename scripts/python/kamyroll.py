@@ -64,7 +64,7 @@ def main():
     elif args.download:
         cr_dl = downloader.crunchyroll(config)
         if args.playlist:
-            cr_dl.download_season(args.download, args.playlist)
+            cr_dl.download_season(args.download, args.playlist, args.all_subs)
         else:
             cr_dl.download(args.download, args.all_subs)
     elif args.url:

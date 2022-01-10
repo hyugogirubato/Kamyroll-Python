@@ -119,6 +119,8 @@ kamyroll -e "SEASON_ID"
 kamyroll --movie "MOVIE_ID"
 kamyroll -m "MOVIE_ID"
 ```
+### Download with all available subtitles
+    Use the `--all-subs` or `-A` flag while downloading an episode or series 
 
 ### Download an episode or movie
 ```
