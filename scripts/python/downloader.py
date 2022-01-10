@@ -11,7 +11,7 @@ import requests
 import converter
 import extractor
 import utils
-
+# from super_stream_tools import tools
 
 def image(output, url):
     if not os.path.exists(output):
@@ -53,9 +53,9 @@ class crunchyroll:
             utils.print_msg(subtitles_url, 4)
         sys.exit(0)
 
-    def download(self, stream_id):
+    def download(self, stream_id, all_subs=False):
         r = self.__get_request(stream_id)
-        (video_url, subtitles_url, audio_language) = extractor.download_url(r, self.config)
+        (video_url, subtitles_url, audio_language) = extractor.download_url(r, self.config, all_subs)
         (type, id) = utils.get_download_type(r)
         (metadata, cover, thumbnail, output, path) = extractor.get_metadata(type, id, self.config)
         utils.create_folder(path)
@@ -78,6 +78,11 @@ class crunchyroll:
 
             utils.print_msg('[debug] Downloaded subtitles', 0)
 
+        if all_subs:
+            utils.print_msg('[debug] Downloading video with all subs', 0)
+            # encode = encoder(verbose=True)
+            # encode.download(video_url, subtitles_url, output)
+
         if self.config.get('preferences').get('image').get('cover') or self.config.get('preferences').get('video').get('attached_picture'):
             image(os.path.join(path, 'cover.jpg'), cover)
             if self.config.get('preferences').get('image').get('cover'):
@@ -88,6 +93,7 @@ class crunchyroll:
             utils.print_msg('[debug] Downloaded thumbnail', 0)
 
         if self.config.get('preferences').get('download').get('video'):
+
             if video_url is None:
                 utils.print_msg('ERROR: No video download link available.', 1)
                 sys.exit(0)

@@ -193,7 +193,7 @@ def playlist(json_episode, config, playlist_episode):
     return playlist_id
 
 
-def download_url(json_stream, config):
+def download_url(json_stream, config, all_subs=False):
     video_url = None
     subtitles_url = None
     subtitles_language = config.get('preferences').get('subtitles').get('language')
@@ -220,6 +220,9 @@ def download_url(json_stream, config):
     else:
         if config.get('preferences').get('download').get('subtitles'):
             utils.print_msg('WARNING: The language of the settings subtitles is not available.', 2)
+
+    if all_subs:
+        subtitles_url = json_subtitles
 
     if video_url is not None:
         video_url = get_m3u8_url(video_url, config)

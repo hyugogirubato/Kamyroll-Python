@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--download', '-d',  type=str, help='Download an episode or movie')
     parser.add_argument('--url',      '-u',  type=str, help='Show m3u8 url of episode or movie')
     parser.add_argument('--playlist', '-p',  type=str, help='Download episode list')
+    parser.add_argument('--all-subs', '-A',  action='store_true', help='Encode all the subs into the downloaded episodes')
     args = parser.parse_args()
 
     try:
@@ -65,7 +66,7 @@ def main():
         if args.playlist:
             cr_dl.download_season(args.download, args.playlist)
         else:
-            cr_dl.download(args.download)
+            cr_dl.download(args.download, args.all_subs)
     elif args.url:
         cr_dl = downloader.crunchyroll(config)
         cr_dl.url(args.url)
