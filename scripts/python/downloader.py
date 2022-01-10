@@ -73,7 +73,7 @@ class crunchyroll:
             utils.print_msg(subtitles_url, 4)
         sys.exit(0)
 
-    def download(self, stream_id, all_subs=False):
+    def download(self, stream_id, all_subs=False, copy_codec=False):
         r = self.__get_request(stream_id)
         (video_url, subtitles_url, audio_language) = extractor.download_url(r, self.config, all_subs)
         (type, id) = utils.get_download_type(r)
@@ -89,7 +89,7 @@ class crunchyroll:
             utils.print_msg('[debug] Downloading video with all subs', 0)
             encode = encoder(verbose=True) 
             subtitles = [{'url':i.get('url'), 'lang': ISO_639_2_LOOKUP.get(i.get('locale'))} for i in subtitles_url.values()]
-            run(encode.download(video_url, subtitles, execute=True, output_file=os.path.join(path, output+'.mkv'), thumbnail=thumbnail, audio_lang=ISO_639_2_LOOKUP.get(audio_language)))
+            run(encode.download(video_url, subtitles, execute=True, output_file=os.path.join(path, output+'.mkv'), thumbnail=thumbnail, audio_lang=ISO_639_2_LOOKUP.get(audio_language)), copy_codec=copy_codec)
 
         if self.config.get('preferences').get('download').get('subtitles') and not already_downloaded:
             if subtitles_url is None:
@@ -240,7 +240,7 @@ class crunchyroll:
                 utils.print_msg('ERROR: Video extension is not supported.', 1)
                 sys.exit(0)
 
-    def download_season(self, season_id, playlist_episode, all_subs=False):
+    def download_season(self, season_id, playlist_episode, all_subs=False, copy_codec=False):
         (policy, signature, key_pair_id) = utils.get_token(self.config)
         self.config = utils.get_config()
 
@@ -264,6 +264,6 @@ class crunchyroll:
         else:
             for i in range(len(playlist_id)):
                 utils.print_msg('[debug] Download playlist: {}/{}'.format(i + 1, len(playlist_id)), 0)
-                self.download(playlist_id[i], all_subs=all_subs)
+                self.download(playlist_id[i], all_subs=all_subs, copy_codec=copy_codec)
             utils.print_msg('[debug] The playlist has been downloaded', 0)
             sys.exit(0)
