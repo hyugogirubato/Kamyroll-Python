@@ -89,7 +89,7 @@ class crunchyroll:
             utils.print_msg('[debug] Downloading video with all subs', 0)
             encode = encoder(verbose=True) 
             subtitles = [{'url':i.get('url'), 'lang': ISO_639_2_LOOKUP.get(i.get('locale'))} for i in subtitles_url.values()]
-            run(encode.download(video_url, subtitles, execute=True, output_file=os.path.join(path, output+'.mkv'), thumbnail=thumbnail, audio_lang=ISO_639_2_LOOKUP.get(audio_language)), copy_codec=copy_codec)
+            run(encode.download(video_url, subtitles, execute=True, output_file=os.path.join(path, output+'.mkv'), thumbnail=thumbnail, audio_lang=ISO_639_2_LOOKUP.get(audio_language), copy_codec=copy_codec))
 
         if self.config.get('preferences').get('download').get('subtitles') and not already_downloaded:
             if subtitles_url is None:
