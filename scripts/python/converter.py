@@ -13,7 +13,7 @@ import utils
 
 class Subtitles:
     def __init__(self, output, language):
-        self.output = output
+        self.output = output[:251]
         self.language = language
 
     def download(self, subtitles_url):
