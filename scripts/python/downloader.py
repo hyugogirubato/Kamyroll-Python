@@ -78,6 +78,7 @@ class crunchyroll:
         (video_url, subtitles_url, audio_language) = extractor.download_url(r, self.config, all_subs)
         (type, id) = utils.get_download_type(r)
         (metadata, cover, thumbnail, output, path) = extractor.get_metadata(type, id, self.config)
+        output = output[:251]
         utils.create_folder(path)
 
         already_downloaded = False
